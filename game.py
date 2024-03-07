@@ -23,9 +23,13 @@ FPS = 60
 font_small = pygame.font.SysFont("arial", 25)
 font_large = pygame.font.SysFont("arial", 36)
 
+BILDER_VERZEICHNIS = "images"
+
+
 def load_image(name):
-    path = os.path.expanduser(f'~/Dokumente/pics/{name}.png')
+    path = os.path.join(BILDER_VERZEICHNIS, f'{name}.png')
     return pygame.image.load(path)
+
 
 def startbildschirm():
     start_screen = True
