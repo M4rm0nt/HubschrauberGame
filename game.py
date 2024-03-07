@@ -1,32 +1,34 @@
 import pygame
 import random
+import os
 
 # Initialisierung von Pygame
 pygame.init()
 
 # Bildschirmeinstellungen
-screen_width, screen_height = 800, 600
+screen_width, screen_height = 600, 400
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 # Farbdefinitionen
 WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-YELLOW = (255, 255, 0)
-PURPLE = (160, 32, 240)
-ORANGE = (255, 165, 0)
 BLACK = (0, 0, 0)
 
 # Spieluhr und FPS
 clock = pygame.time.Clock()
 FPS = 60
 
+
+# Lade Bilder
+def load_image(name):
+    path = os.path.expanduser(f'~/Dokumente/pics/{name}.png')
+    return pygame.image.load(path)
+
+
 # Sprite-Klassen
 class LKW(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((50, 30))
-        self.image.fill(GREEN)
+        self.image = load_image('lastwagen')  # Bild für den LKW
         self.rect = self.image.get_rect(center=(screen_width // 2, screen_height - 50))
         self.geschwindigkeit = 5
         self.sprit = 100
@@ -41,13 +43,13 @@ class LKW(pygame.sprite.Sprite):
     def move(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            self.rect.x -= self.geschwindigkeit
+            self.rect.x = max(0, self.rect.x - self.geschwindigkeit)
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            self.rect.x += self.geschwindigkeit
+            self.rect.x = min(screen_width - self.rect.width, self.rect.x + self.geschwindigkeit)
         if keys[pygame.K_w] or keys[pygame.K_UP]:
-            self.rect.y -= self.geschwindigkeit
+            self.rect.y = max(0, self.rect.y - self.geschwindigkeit)
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-            self.rect.y += self.geschwindigkeit
+            self.rect.y = min(screen_height - self.rect.height, self.rect.y + self.geschwindigkeit)
 
     def consume_fuel(self):
         if any(pygame.key.get_pressed()):
@@ -78,8 +80,7 @@ class LKW(pygame.sprite.Sprite):
 class Hubschrauber(pygame.sprite.Sprite):
     def __init__(self, lkw):
         super().__init__()
-        self.image = pygame.Surface((40, 20))
-        self.image.fill(RED)
+        self.image = load_image('helicopter')  # Bild für den Hubschrauber
         self.rect = self.image.get_rect(center=(random.choice([0, screen_width]), random.randint(0, screen_height)))
         self.geschwindigkeit = 3
         self.lkw = lkw
@@ -98,8 +99,7 @@ class Hubschrauber(pygame.sprite.Sprite):
 class Erzquelle(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((100, 50))
-        self.image.fill(PURPLE)
+        self.image = load_image('erz')  # Bild für die Erzquelle
         self.rect = self.image.get_rect(center=(random.randint(100, screen_width - 100), random.randint(50, screen_height - 50)))
         self.erz_menge = 1000
 
@@ -110,8 +110,7 @@ class Erzquelle(pygame.sprite.Sprite):
 class Abladeplatz(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((100, 100))
-        self.image.fill(ORANGE)
+        self.image = load_image('storage')  # Bild für den Abladeplatz
         self.rect = self.image.get_rect(center=(screen_width - 100, screen_height // 2))
         self.erz = 0
         self.kapazität = 1000
@@ -120,9 +119,9 @@ class Abladeplatz(pygame.sprite.Sprite):
 class Tankstelle(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((60, 60))
-        self.image.fill(YELLOW)
+        self.image = load_image('fuel')  # Bild für die Tankstelle
         self.rect = self.image.get_rect(center=(random.randint(100, screen_width - 100), random.randint(50, screen_height - 50)))
+
 
 # Spiellogik
 def main():
