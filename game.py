@@ -21,6 +21,50 @@ def load_image(name):
     return pygame.image.load(path)
 
 
+def startbildschirm():
+    start_screen = True
+    while start_screen:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    start_screen = False
+
+        screen.fill(WHITE)
+        font = pygame.font.SysFont("arial", 25)
+        titel_text = font.render("ErzCollector", True, BLACK)
+        regeln_text = font.render("Sammle Erz, meide Hubschrauber. Starte mit Leertaste.", True, BLACK)
+        screen.blit(titel_text, (100, 200))
+        screen.blit(regeln_text, (100, 300))
+        pygame.display.flip()
+        clock.tick(15)
+
+
+def pause():
+    paused = True
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    paused = False
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    quit()
+
+        screen.fill(WHITE)
+        font = pygame.font.SysFont("arial", 36)
+        pause_text = font.render("Pause. Fortsetzen mit C. Beenden mit Q.", True, BLACK)
+        screen.blit(pause_text, (100, 300))
+        pygame.display.flip()
+        clock.tick(5)
+
+
+
 class LKW(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -219,4 +263,12 @@ def main():
 
 
 if __name__ == '__main__':
+    startbildschirm()
     main()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                pause()
