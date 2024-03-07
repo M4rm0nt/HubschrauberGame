@@ -2,24 +2,30 @@ import pygame
 import random
 import os
 
+# Pygame initialisieren
 pygame.init()
 
+# Bildschirmeinstellungen
 screen_width, screen_height = 800, 600
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("ErzCollector")
 
+# Farbdefinitionen
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 
+# Uhr und FPS
 clock = pygame.time.Clock()
 FPS = 60
 
+# Font-Objekte initialisieren
+font_small = pygame.font.SysFont("arial", 25)
+font_large = pygame.font.SysFont("arial", 36)
 
 def load_image(name):
     path = os.path.expanduser(f'~/Dokumente/pics/{name}.png')
     return pygame.image.load(path)
-
 
 def startbildschirm():
     start_screen = True
@@ -33,14 +39,12 @@ def startbildschirm():
                     start_screen = False
 
         screen.fill(WHITE)
-        font = pygame.font.SysFont("arial", 25)
-        titel_text = font.render("ErzCollector", True, BLACK)
-        regeln_text = font.render("Sammle Erz, meide Hubschrauber. Starte mit Leertaste.", True, BLACK)
+        titel_text = font_small.render("ErzCollector", True, BLACK)
+        regeln_text = font_small.render("Sammle Erz, meide Hubschrauber. Starte mit Leertaste.", True, BLACK)
         screen.blit(titel_text, (100, 200))
         screen.blit(regeln_text, (100, 300))
         pygame.display.flip()
         clock.tick(15)
-
 
 def pause():
     paused = True
@@ -57,12 +61,16 @@ def pause():
                     quit()
 
         screen.fill(WHITE)
-        font = pygame.font.SysFont("arial", 36)
-        pause_text = font.render("Pause. Fortsetzen mit C. Beenden mit Q.", True, BLACK)
+        pause_text = font_large.render("Pause. Fortsetzen mit C. Beenden mit Q.", True, BLACK)
         screen.blit(pause_text, (100, 300))
         pygame.display.flip()
         clock.tick(5)
 
+
+def draw_infos(screen, font, infos, x_start, y_start, line_spacing):
+    for index, info in enumerate(infos):
+        text_surface = font.render(info, True, BLACK)
+        screen.blit(text_surface, (x_start, y_start + index * line_spacing))
 
 
 class LKW(pygame.sprite.Sprite):
@@ -190,12 +198,10 @@ class Tankstelle(pygame.sprite.Sprite):
 
 
 def main():
-    pygame.init()
-    screen = pygame.display.set_mode((screen_width, screen_height))
-    pygame.display.set_caption("ErzCollector")
-
+    global screen
     running = True
 
+    # Instanzen der Spielobjekte
     lkw = LKW()
     erzquelle = Erzquelle()
     ablageplatz = Abladeplatz()
@@ -203,10 +209,16 @@ def main():
     helipad = Helipad()
     hubschrauber = Hubschrauber(lkw, helipad)
 
+    # Sprite-Gruppen
     alle_sprites = pygame.sprite.Group()
     hubschrauber_group = pygame.sprite.Group()
     alle_sprites.add(lkw, erzquelle, ablageplatz, tankstelle, helipad, hubschrauber)
     hubschrauber_group.add(hubschrauber)
+
+    # Startpositionen und Zeilenabstand für die Anzeige der Informationen
+    x_start = 10  # Startposition am linken Rand
+    y_start = 10  # Startposition von oben
+    line_spacing = 25  # Abstand zwischen den Zeilen
 
     while running:
         for event in pygame.event.get():
@@ -219,27 +231,23 @@ def main():
         screen.fill(WHITE)
         alle_sprites.draw(screen)
 
-        font = pygame.font.SysFont(None, 20)
+        # Informationen zur Anzeige
         infos = [
             f'Sprit: {int(lkw.sprit)}',
             f'Erz im LKW: {lkw.erz}',
             f'Erz am Abladeplatz: {ablageplatz.erz}/{ablageplatz.kapazität}'
         ]
 
-        text_width = screen_width / len(infos)
-        for index, text in enumerate(infos):
-            text_surface = font.render(text, True, BLACK)
-            x_position = text_width * index + (text_width - text_surface.get_width()) / 2
-            screen.blit(text_surface, (x_position, 10))
+        # Anzeigen der Informationen
+        draw_infos(screen, font_small, infos, x_start, y_start, line_spacing)
 
         pygame.display.flip()
         clock.tick(FPS)
 
-        if lkw.sprit <= 0 or ablageplatz.erz >= 800:
+        if lkw.sprit <= 0 or ablageplatz.erz >= ablageplatz.kapazität:
             running = False
-            font = pygame.font.SysFont("arial", 36)
-            end_message = "Spiel vorbei! Neu starten? (Y/N)"
-            text_surface = font.render(end_message, True, RED)
+            end_message = "Spiel vorbei! Neu starten? (J/N)"
+            text_surface = font_large.render(end_message, True, RED)
             text_rect = text_surface.get_rect(center=(screen_width / 2, screen_height / 2))
             screen.fill(WHITE)
             screen.blit(text_surface, text_rect)
@@ -249,7 +257,7 @@ def main():
             while wait_for_input:
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_y:
+                        if event.key == pygame.K_j:
                             main()
                             wait_for_input = False
                         elif event.key == pygame.K_n:
@@ -265,10 +273,3 @@ def main():
 if __name__ == '__main__':
     startbildschirm()
     main()
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:
-                pause()
