@@ -1,37 +1,32 @@
 import pygame
 import random
 import os
-import sys
 
-# Initialisierung von Pygame
 pygame.init()
 
-# Bildschirmeinstellungen
 screen_width, screen_height = 800, 600
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("ErzCollector")  # Setzen des Fenstertitels
+pygame.display.set_caption("ErzCollector")
 
-# Farbdefinitionen
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 
-# Spieluhr und FPS
 clock = pygame.time.Clock()
 FPS = 60
 
-# Lade Bilder
+
 def load_image(name):
     path = os.path.expanduser(f'~/Dokumente/pics/{name}.png')
     return pygame.image.load(path)
 
-# Sprite-Klassen
+
 class LKW(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = load_image('lastwagen')
         self.rect = self.image.get_rect(center=(screen_width // 2, screen_height - 50))
-        self.hitbox = pygame.Rect(self.rect.left + 10, self.rect.top + 10, self.rect.width - 20, self.rect.height - 20)  # Anpassung der Hitbox
+        self.hitbox = pygame.Rect(self.rect.left + 10, self.rect.top + 10, self.rect.width - 20, self.rect.height - 20)
         self.geschwindigkeit = 5
         self.sprit = 100
         self.erz = 0
@@ -62,7 +57,7 @@ class LKW(pygame.sprite.Sprite):
 
     def check_collisions(self, erzquelle, ablageplatz, tankstelle, hubschrauber_group):
         collided_hubschrauber = pygame.sprite.spritecollideany(self, hubschrauber_group, collided=lambda s1, s2: s1.hitbox.colliderect(s2.rect))
-        if collided_hubschrauber:
+        if collided_hubschrauber and self.erz > 0:
             self.erz = 0
             collided_hubschrauber.zurücksetzen_erforderlich = True
         if self.hitbox.colliderect(erzquelle.rect):
@@ -82,47 +77,14 @@ class LKW(pygame.sprite.Sprite):
                 if self.erz == abzubauendes_erz:
                     erzquelle.neu_positionieren()
 
-class Helipad(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = load_image('helipad')
-        self.rect = self.image.get_rect(center=(random.randint(50, screen_width - 150), random.randint(50, screen_height - 50)))
-
-class Hubschrauber(pygame.sprite.Sprite):
-    def __init__(self, lkw, helipad):
-        super().__init__()
-        self.image = load_image('helicopter')
-        self.rect = self.image.get_rect(center=helipad.rect.center)
-        self.geschwindigkeit = 2.5
-        self.lkw = lkw
-        self.helipad = helipad
-        self.zurücksetzen_erforderlich = False
-
-    def update(self):
-        if self.zurücksetzen_erforderlich:
-            self.reset_to_helipad()
-        else:
-            self.follow_lkw()
-
-    def follow_lkw(self):
-        if self.lkw.rect.centerx < self.rect.centerx:
-            self.rect.x -= self.geschwindigkeit
-        elif self.lkw.rect.centerx > self.rect.centerx:
-            self.rect.x += self.geschwindigkeit
-        if self.lkw.rect.centery < self.rect.centery:
-            self.rect.y -= self.geschwindigkeit
-        elif self.lkw.rect.centery > self.rect.centery:
-            self.rect.y += self.geschwindigkeit
-
-    def reset_to_helipad(self):
-        self.rect.center = self.helipad.rect.center
-        self.zurücksetzen_erforderlich = False
 
 class Helipad(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = load_image('helipad')
-        self.rect = self.image.get_rect(center=(random.randint(50, screen_width - 150), random.randint(50, screen_height - 50)))
+        self.rect = self.image.get_rect(
+            center=(random.randint(50, screen_width - 150), random.randint(50, screen_height - 50)))
+
 
 class Hubschrauber(pygame.sprite.Sprite):
     def __init__(self, lkw, helipad):
@@ -179,19 +141,17 @@ class Tankstelle(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = load_image('fuel')
-        self.rect = self.image.get_rect(center=(random.randint(50, screen_width - 50), random.randint(50, screen_height - 50)))
+        self.rect = self.image.get_rect(
+            center=(random.randint(50, screen_width - 50), random.randint(50, screen_height - 50)))
 
 
-# Spiellogik
 def main():
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("ErzCollector")
 
     running = True
-    spiel_gewonnen = False
 
-    # Erstelle die Spielobjekte (LKW, Erzquelle, Abladeplatz, Tankstelle, Helipad, Hubschrauber)
     lkw = LKW()
     erzquelle = Erzquelle()
     ablageplatz = Abladeplatz()
@@ -209,15 +169,12 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        # Aktualisiere Spielobjekte
         lkw.update(erzquelle, ablageplatz, tankstelle, hubschrauber_group)
         hubschrauber_group.update()
 
-        # Spiellogik für Kollision und Spritverbrauch etc.
         screen.fill(WHITE)
         alle_sprites.draw(screen)
 
-        # Anzeigen von Spielinformationen wie Sprit, Erz im LKW, etc.
         font = pygame.font.SysFont(None, 20)
         infos = [
             f'Sprit: {int(lkw.sprit)}',
@@ -234,10 +191,8 @@ def main():
         pygame.display.flip()
         clock.tick(FPS)
 
-        # Überprüfe Spielendebedingungen
         if lkw.sprit <= 0 or ablageplatz.erz >= 800:
             running = False
-            # Zeigt ein einfaches "Spiel vorbei" Fenster anstelle eines richtigen Popups
             font = pygame.font.SysFont("arial", 36)
             end_message = "Spiel vorbei! Neu starten? (Y/N)"
             text_surface = font.render(end_message, True, RED)
@@ -246,20 +201,17 @@ def main():
             screen.blit(text_surface, text_rect)
             pygame.display.flip()
 
-            # Warte auf Benutzerreaktion
             wait_for_input = True
             while wait_for_input:
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_y:
-                            main()  # Neustart des Spiels
+                            main()
                             wait_for_input = False
                         elif event.key == pygame.K_n:
-                            wait_for_input = False
                             pygame.quit()
                             return
                     elif event.type == pygame.QUIT:
-                        wait_for_input = False
                         pygame.quit()
                         return
 
