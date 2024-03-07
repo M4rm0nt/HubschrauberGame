@@ -280,7 +280,7 @@ def main():
         pygame.display.flip()
         clock.tick(FPS)
 
-        if lkw.sprit <= 0 or ablageplatz.erz >= ablageplatz.kapazität or lkw.gestohlenes_erz >= 0.2 * (erzquelle.erz_menge + lkw.erz):
+        if lkw.sprit <= 0 or ablageplatz.erz >= ablageplatz.kapazität or lkw.gestohlenes_erz > 0.2 * (erzquelle.erz_menge + lkw.erz):
             running = False
             end_message = "Spiel vorbei! Neu starten? (J/N)"
             text_surface = font_large.render(end_message, True, RED)
