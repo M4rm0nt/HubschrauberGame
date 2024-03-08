@@ -85,29 +85,43 @@ def pause():
         pause_text = SCHRIFT_GROSS.render("Pause", True, SCHWARZ)
         BILDSCHIRM.blit(pause_text, (BILDSCHIRM_BREITE // 2 - pause_text.get_width() // 2, 100))
 
+        # Steuerung anzeigen
         steuerung = [
-            "Steuerung:",
-            "Bewegung: Pfeiltasten oder WASD"
+            "Steuerung",
+            "Pfeiltasten oder WASD"
         ]
+        for index, element in enumerate(steuerung):
+            zeige_infos([element], 200 + index * 30)
+
+        # Ziele anzeigen
+        ziele_start_y = 300
         ziele = [
-            "Spielziele:",
+            "Spielziele",
             "- Sammle Erz von der Erzquelle",
             "- Bringe das Erz zum Abladeplatz",
             "- Vermeide Kollisionen mit Hubschraubern",
             "- Du verlierst wenn der Hubschrauber 20% des Erzes besitzt",
-            "- Halte den Kraftstoffvorrat im Auge",
-            "Drücke 2 mal 'P' zum weiterspielen oder 'Q' zum beenden"
+            "- Halte den Kraftstoffvorrat im Auge"
         ]
-        zeige_infos(steuerung, 200)
-        zeige_infos(ziele, 320)
+        for index, ziel in enumerate(ziele):
+            zeige_infos([ziel], ziele_start_y + index * 30)
+
+        # Optionen anzeigen
+        options_start_y = 500
+        options = [
+            "- Drücke 2 mal 'P' zum weiterspielen oder 'Q' zum beenden"
+        ]
+        zeige_infos(options, options_start_y)
 
         pygame.display.flip()
         UHR.tick(5)
 
 
+
 # Funktion zum Zeichnen von Informationen
 def zeige_infos(info_liste, y_start, separate_info=None):
-    x_offset = BILDSCHIRM_BREITE // 2 - sum([SCHRIFT_KLEIN.render(info, True, SCHWARZ).get_width() for info in info_liste]) // 2
+    x_offset = BILDSCHIRM_BREITE // 2 - sum(
+        [SCHRIFT_KLEIN.render(info, True, SCHWARZ).get_width() for info in info_liste]) // 2
     for info in info_liste:
         text_surface = SCHRIFT_KLEIN.render(info, True, SCHWARZ)
         BILDSCHIRM.blit(text_surface, (x_offset, y_start))
@@ -134,7 +148,7 @@ class LKW(pygame.sprite.Sprite):
 
     def update(self, tasten, erz_quelle, lager, tankstelle, hubschrauber_gruppe):
         self.bewegen(tasten)
-        self.kraftstoff_verbrauchen()
+        self.kraftstoff_verbrauchen(tasten)
         self.kollision_pruefen(erz_quelle, lager, tankstelle, hubschrauber_gruppe)
 
     def bewegen(self, tasten):
@@ -148,14 +162,18 @@ class LKW(pygame.sprite.Sprite):
             self.rect.y = min(BILDSCHIRM_HOEHE - self.rect.height, self.rect.y + self.geschwindigkeit)
         self.hitbox.center = self.rect.center
 
-    def kraftstoff_verbrauchen(self):
-        if any(pygame.key.get_pressed()):
+    def kraftstoff_verbrauchen(self, tasten):
+        if tasten[Tasten.LINKS.value] or tasten[Tasten.RECHTS.value] or tasten[Tasten.OBEN.value] or tasten[
+            Tasten.UNTEN.value] or tasten[Tasten.W.value] or tasten[Tasten.A.value] or tasten[Tasten.S.value] or tasten[
+            Tasten.D.value]:
             self.kraftstoff -= 0.15
             if self.kraftstoff <= 0:
                 self.kill()
 
     def kollision_pruefen(self, erz_quelle, lager, tankstelle, hubschrauber_gruppe):
-        kollidierter_hubschrauber = pygame.sprite.spritecollideany(self, hubschrauber_gruppe, collided=lambda s1, s2: s1.hitbox.colliderect(s2.rect))
+        kollidierter_hubschrauber = pygame.sprite.spritecollideany(self, hubschrauber_gruppe,
+                                                                   collided=lambda s1, s2: s1.hitbox.colliderect(
+                                                                       s2.rect))
         if kollidierter_hubschrauber and self.erz > 0:
             self.gestohlenes_erz += self.erz  # Erz stehlen
             self.erz = 0
@@ -183,7 +201,8 @@ class Hubschrauberlandeplatz(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = bild_laden('hubschrauberlandeplatz')
-        self.rect = self.image.get_rect(center=(random.randint(50, BILDSCHIRM_BREITE - 150), random.randint(50, BILDSCHIRM_HOEHE - 50)))
+        self.rect = self.image.get_rect(
+            center=(random.randint(50, BILDSCHIRM_BREITE - 150), random.randint(50, BILDSCHIRM_HOEHE - 50)))
 
 
 # Hubschrauber-Klasse
@@ -223,7 +242,8 @@ class Erzquelle(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = bild_laden('erz')
-        self.rect = self.image.get_rect(center=(random.randint(100, BILDSCHIRM_BREITE - 100), random.randint(50, BILDSCHIRM_HOEHE - 50)))
+        self.rect = self.image.get_rect(
+            center=(random.randint(100, BILDSCHIRM_BREITE - 100), random.randint(50, BILDSCHIRM_HOEHE - 50)))
         self.erz_menge = 1000
 
     def neupositionieren(self):
@@ -245,7 +265,8 @@ class Tankstelle(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = bild_laden('tankstelle')
-        self.rect = self.image.get_rect(center=(random.randint(50, BILDSCHIRM_BREITE - 50), random.randint(50, BILDSCHIRM_HOEHE - 50)))
+        self.rect = self.image.get_rect(
+            center=(random.randint(50, BILDSCHIRM_BREITE - 50), random.randint(50, BILDSCHIRM_HOEHE - 50)))
 
 
 # Hauptfunktion
