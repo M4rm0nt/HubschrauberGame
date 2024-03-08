@@ -1,189 +1,209 @@
 import pygame
 import random
 import os
+from enum import Enum
 
 pygame.init()
 
-screen_width, screen_height = 800, 600
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("ErzCollector")
-
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-
-clock = pygame.time.Clock()
+# Definiere Konstanten
+BILDSCHIRM_BREITE, BILDSCHIRM_HOEHE = 800, 600
+WEISS = (255, 255, 255)
+SCHWARZ = (0, 0, 0)
+ROT = (255, 0, 0)
 FPS = 60
 
-font_small = pygame.font.SysFont("arial", 25)
-font_large = pygame.font.SysFont("arial", 36)
+# Schriften
+SCHRIFT_KLEIN = pygame.font.SysFont("arial", 25)
+SCHRIFT_GROSS = pygame.font.SysFont("arial", 36)
 
-BILDER_VERZEICHNIS = "images"
-
-
-def load_image(name):
-    path = os.path.join(BILDER_VERZEICHNIS, f'{name}.png')
-    return pygame.image.load(path)
+# Verzeichnis für Bilder
+BILDER_VERZEICHNIS = "bilder"
 
 
-def startbildschirm():
-    start_screen = True
-    while start_screen:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+# Aufzählung für Tasten
+class Tasten(Enum):
+    LINKS = pygame.K_LEFT
+    RECHTS = pygame.K_RIGHT
+    OBEN = pygame.K_UP
+    UNTEN = pygame.K_DOWN
+    A = pygame.K_a
+    D = pygame.K_d
+    W = pygame.K_w
+    S = pygame.K_s
+    PAUSE = pygame.K_p
+
+
+# Laden von Bildern
+def bild_laden(name):
+    pfad = os.path.join(BILDER_VERZEICHNIS, f'{name}.png')
+    return pygame.image.load(pfad)
+
+
+# Startbildschirm
+def start_bildschirm():
+    start = True
+    while start:
+        for ereignis in pygame.event.get():
+            if ereignis.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    start_screen = False
+            if ereignis.type == pygame.KEYDOWN:
+                if ereignis.key == pygame.K_SPACE:
+                    start = False
 
-        screen.fill(WHITE)
-        titel_text = font_small.render("ErzCollector", True, BLACK)
-        screen.blit(titel_text, (100, 200))
-        info_text = font_small.render("Sammle Erz, meide Hubschrauber.", True, BLACK)
-        screen.blit(info_text, (100, 300))
-        info_text = font_small.render("Starte mit Leertaste.", True, BLACK)
-        screen.blit(info_text, (100, 400))
-        info_text = font_small.render("Für die Optionen zu sehen, drücke 'P' im Spiel.", True, BLACK)
-        screen.blit(info_text, (100, 500))
+        BILDSCHIRM.fill(WEISS)
+        titel_text = SCHRIFT_KLEIN.render("ErzCollector", True, SCHWARZ)
+        BILDSCHIRM.blit(titel_text, (100, 200))
+        info_text = SCHRIFT_KLEIN.render("Sammle Erz, meide Hubschrauber.", True, SCHWARZ)
+        BILDSCHIRM.blit(info_text, (100, 300))
+        info_text = SCHRIFT_KLEIN.render("Starte mit Leertaste.", True, SCHWARZ)
+        BILDSCHIRM.blit(info_text, (100, 400))
+        info_text = SCHRIFT_KLEIN.render("Für die Optionen zu sehen, drücke 'P' im Spiel.", True, SCHWARZ)
+        BILDSCHIRM.blit(info_text, (100, 500))
         pygame.display.flip()
-        clock.tick(15)
+        UHR.tick(15)
 
 
+# Pause-Funktion
 def pause():
-    paused = True
-    while paused:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+    pausiert = True
+    while pausiert:
+        for ereignis in pygame.event.get():
+            if ereignis.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_c:
-                    paused = False
-                elif event.key == pygame.K_q:
+            if ereignis.type == pygame.KEYDOWN:
+                if ereignis.key == pygame.K_c:
+                    pausiert = False
+                elif ereignis.key == pygame.K_q:
                     pygame.quit()
                     quit()
-                elif event.key == pygame.K_p:
-                    paused = False
+                elif ereignis.key == pygame.K_p:
+                    pausiert = False
 
-        screen.fill(WHITE)
-        pause_text = font_large.render("Pause", True, BLACK)
-        screen.blit(pause_text, (screen_width // 2 - pause_text.get_width() // 2, 100))
+        BILDSCHIRM.fill(WEISS)
+        pause_text = SCHRIFT_GROSS.render("Pause", True, SCHWARZ)
+        BILDSCHIRM.blit(pause_text, (BILDSCHIRM_BREITE // 2 - pause_text.get_width() // 2, 100))
 
-        control_text = font_small.render("Steuerung:", True, BLACK)
-        screen.blit(control_text, (screen_width // 2 - control_text.get_width() // 2, 200))
-        control_text1 = font_small.render("Bewegung: Pfeiltasten oder WASD", True, BLACK)
-        screen.blit(control_text1, (screen_width // 2 - control_text1.get_width() // 2, 250))
-
-        goal_text = font_small.render("Spielziele:", True, BLACK)
-        screen.blit(goal_text, (screen_width // 2 - goal_text.get_width() // 2, 320))
-        goal_text1 = font_small.render("- Sammle Erz von der Erzquelle", True, BLACK)
-        screen.blit(goal_text1, (screen_width // 2 - goal_text1.get_width() // 2, 360))
-        goal_text2 = font_small.render("- Bringe das Erz zum Abladeplatz", True, BLACK)
-        screen.blit(goal_text2, (screen_width // 2 - goal_text2.get_width() // 2, 390))
-        goal_text3 = font_small.render("- Vermeide Kollisionen mit Hubschraubern", True, BLACK)
-        screen.blit(goal_text3, (screen_width // 2 - goal_text3.get_width() // 2, 420))
-        goal_text3 = font_small.render("- Du verlierst wenn der Hubschrauber 20% des Erzes besitzt", True, BLACK)
-        screen.blit(goal_text3, (screen_width // 2 - goal_text3.get_width() // 2, 450))
-        goal_text4 = font_small.render("- Halte den Kraftstoffvorrat im Auge", True, BLACK)
-        screen.blit(goal_text4, (screen_width // 2 - goal_text4.get_width() // 2, 480))
-        goal_text5 = font_small.render("Drücke 2 mal 'P' zum weiterspielen oder 'Q' zum beenden", True, BLACK)
-        screen.blit(goal_text5, (screen_width // 2 - goal_text5.get_width() // 2, 540))
+        steuerung = [
+            "Steuerung:",
+            "Bewegung: Pfeiltasten oder WASD"
+        ]
+        ziele = [
+            "Spielziele:",
+            "- Sammle Erz von der Erzquelle",
+            "- Bringe das Erz zum Abladeplatz",
+            "- Vermeide Kollisionen mit Hubschraubern",
+            "- Du verlierst wenn der Hubschrauber 20% des Erzes besitzt",
+            "- Halte den Kraftstoffvorrat im Auge",
+            "Drücke 2 mal 'P' zum weiterspielen oder 'Q' zum beenden"
+        ]
+        zeige_infos(steuerung, 200)
+        zeige_infos(ziele, 320)
 
         pygame.display.flip()
-        clock.tick(5)
+        UHR.tick(5)
 
 
-def draw_infos(screen, font, infos, x_start, y_start, line_spacing):
-    for index, info in enumerate(infos):
-        text_surface = font.render(info, True, BLACK)
-        screen.blit(text_surface, (x_start, y_start + index * line_spacing))
+# Funktion zum Zeichnen von Informationen
+def zeige_infos(info_liste, y_start, separate_info=None):
+    x_offset = BILDSCHIRM_BREITE // 2 - sum([SCHRIFT_KLEIN.render(info, True, SCHWARZ).get_width() for info in info_liste]) // 2
+    for info in info_liste:
+        text_surface = SCHRIFT_KLEIN.render(info, True, SCHWARZ)
+        BILDSCHIRM.blit(text_surface, (x_offset, y_start))
+        x_offset += text_surface.get_width() + 20
+
+    if separate_info is not None:
+        separate_text_surface = SCHRIFT_KLEIN.render(separate_info, True, SCHWARZ)
+        separate_text_rect = separate_text_surface.get_rect(midbottom=(BILDSCHIRM_BREITE // 2, BILDSCHIRM_HOEHE - 10))
+        BILDSCHIRM.blit(separate_text_surface, separate_text_rect)
 
 
+# LKW-Klasse
 class LKW(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = load_image('lastwagen')
-        self.rect = self.image.get_rect(center=(screen_width // 2, screen_height - 50))
+        self.image = bild_laden('lastwagen')
+        self.rect = self.image.get_rect(center=(BILDSCHIRM_BREITE // 2, BILDSCHIRM_HOEHE - 50))
         self.hitbox = pygame.Rect(self.rect.left + 10, self.rect.top + 10, self.rect.width - 20, self.rect.height - 20)
         self.geschwindigkeit = 5
-        self.sprit = 100
+        self.kraftstoff = 100
         self.erz = 0
         self.max_erz = 50
         self.gestohlenes_erz = 0
 
-    def update(self, erzquelle, ablageplatz, tankstelle, hubschrauber_group):
-        self.move()
-        self.consume_fuel()
-        self.check_collisions(erzquelle, ablageplatz, tankstelle, hubschrauber_group)
+    def update(self, tasten, erz_quelle, lager, tankstelle, hubschrauber_gruppe):
+        self.bewegen(tasten)
+        self.kraftstoff_verbrauchen()
+        self.kollision_pruefen(erz_quelle, lager, tankstelle, hubschrauber_gruppe)
 
-    def move(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+    def bewegen(self, tasten):
+        if tasten[Tasten.LINKS.value] or tasten[Tasten.A.value]:
             self.rect.x = max(0, self.rect.x - self.geschwindigkeit)
-        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            self.rect.x = min(screen_width - self.rect.width, self.rect.x + self.geschwindigkeit)
-        if keys[pygame.K_w] or keys[pygame.K_UP]:
+        if tasten[Tasten.RECHTS.value] or tasten[Tasten.D.value]:
+            self.rect.x = min(BILDSCHIRM_BREITE - self.rect.width, self.rect.x + self.geschwindigkeit)
+        if tasten[Tasten.OBEN.value] or tasten[Tasten.W.value]:
             self.rect.y = max(0, self.rect.y - self.geschwindigkeit)
-        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-            self.rect.y = min(screen_height - self.rect.height, self.rect.y + self.geschwindigkeit)
+        if tasten[Tasten.UNTEN.value] or tasten[Tasten.S.value]:
+            self.rect.y = min(BILDSCHIRM_HOEHE - self.rect.height, self.rect.y + self.geschwindigkeit)
         self.hitbox.center = self.rect.center
 
-    def consume_fuel(self):
+    def kraftstoff_verbrauchen(self):
         if any(pygame.key.get_pressed()):
-            self.sprit -= 0.15
-            if self.sprit <= 0:
+            self.kraftstoff -= 0.15
+            if self.kraftstoff <= 0:
                 self.kill()
 
-    def check_collisions(self, erzquelle, ablageplatz, tankstelle, hubschrauber_group):
-        collided_hubschrauber = pygame.sprite.spritecollideany(self, hubschrauber_group, collided=lambda s1, s2: s1.hitbox.colliderect(s2.rect))
-        if collided_hubschrauber and self.erz > 0:
+    def kollision_pruefen(self, erz_quelle, lager, tankstelle, hubschrauber_gruppe):
+        kollidierter_hubschrauber = pygame.sprite.spritecollideany(self, hubschrauber_gruppe, collided=lambda s1, s2: s1.hitbox.colliderect(s2.rect))
+        if kollidierter_hubschrauber and self.erz > 0:
             self.gestohlenes_erz += self.erz  # Erz stehlen
             self.erz = 0
-            collided_hubschrauber.zurücksetzen_erforderlich = True
-        if self.hitbox.colliderect(erzquelle.rect):
-            self.collect_erz(erzquelle)
-        if self.hitbox.colliderect(ablageplatz.rect):
-            ablageplatz.erz += self.erz
+            kollidierter_hubschrauber.reset_required = True
+        if self.hitbox.colliderect(erz_quelle.rect):
+            self.erz_sammeln(erz_quelle)
+        if self.hitbox.colliderect(lager.rect):
+            lager.erz += self.erz
             self.erz = 0
         if self.hitbox.colliderect(tankstelle.rect):
-            self.sprit = 100
+            self.kraftstoff = 100
 
-    def collect_erz(self, erzquelle):
+    def erz_sammeln(self, erz_quelle):
         if self.erz < self.max_erz:
-            if erzquelle.erz_menge > 0:
-                abzubauendes_erz = min(self.max_erz - self.erz, erzquelle.erz_menge)
-                self.erz += abzubauendes_erz
-                erzquelle.erz_menge -= abzubauendes_erz
-                if self.erz == abzubauendes_erz:
-                    erzquelle.neu_positionieren()
+            if erz_quelle.erz_menge > 0:
+                zu_bergendes_erz = min(self.max_erz - self.erz, erz_quelle.erz_menge)
+                self.erz += zu_bergendes_erz
+                erz_quelle.erz_menge -= zu_bergendes_erz
+                if self.erz == zu_bergendes_erz:
+                    erz_quelle.neupositionieren()
 
 
-class Helipad(pygame.sprite.Sprite):
+# Hubschrauberlandeplatz-Klasse
+class Hubschrauberlandeplatz(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = load_image('helipad')
-        self.rect = self.image.get_rect(
-            center=(random.randint(50, screen_width - 150), random.randint(50, screen_height - 50)))
+        self.image = bild_laden('hubschrauberlandeplatz')
+        self.rect = self.image.get_rect(center=(random.randint(50, BILDSCHIRM_BREITE - 150), random.randint(50, BILDSCHIRM_HOEHE - 50)))
 
 
+# Hubschrauber-Klasse
 class Hubschrauber(pygame.sprite.Sprite):
-    def __init__(self, lkw, helipad):
+    def __init__(self, lkw, hubschrauberlandeplatz):
         super().__init__()
-        self.image = load_image('helicopter')
-        self.rect = self.image.get_rect(center=helipad.rect.center)
+        self.image = bild_laden('hubschrauber')
+        self.rect = self.image.get_rect(center=hubschrauberlandeplatz.rect.center)
         self.geschwindigkeit = 2.5
         self.lkw = lkw
-        self.helipad = helipad
-        self.zurücksetzen_erforderlich = False
+        self.hubschrauberlandeplatz = hubschrauberlandeplatz
+        self.reset_required = False
 
     def update(self):
-        if self.zurücksetzen_erforderlich:
-            self.reset_to_helipad()
+        if self.reset_required:
+            self.zuruecksetzen_zu_hubschrauberlandeplatz()
         else:
-            self.follow_lkw()
+            self.lkw_verfolgen()
 
-    def follow_lkw(self):
+    def lkw_verfolgen(self):
         if self.lkw.rect.centerx < self.rect.centerx:
             self.rect.x -= self.geschwindigkeit
         elif self.lkw.rect.centerx > self.rect.centerx:
@@ -193,113 +213,110 @@ class Hubschrauber(pygame.sprite.Sprite):
         elif self.lkw.rect.centery > self.rect.centery:
             self.rect.y += self.geschwindigkeit
 
-    def reset_to_helipad(self):
-        self.rect.center = self.helipad.rect.center
-        self.zurücksetzen_erforderlich = False
+    def zuruecksetzen_zu_hubschrauberlandeplatz(self):
+        self.rect.center = self.hubschrauberlandeplatz.rect.center
+        self.reset_required = False
 
 
+# Erzquelle-Klasse
 class Erzquelle(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = load_image('erz')
-        self.rect = self.image.get_rect(center=(random.randint(100, screen_width - 100), random.randint(50, screen_height - 50)))
+        self.image = bild_laden('erz')
+        self.rect = self.image.get_rect(center=(random.randint(100, BILDSCHIRM_BREITE - 100), random.randint(50, BILDSCHIRM_HOEHE - 50)))
         self.erz_menge = 1000
 
-    def neu_positionieren(self):
-        self.rect.center = (random.randint(100, screen_width - 100), random.randint(50, screen_height - 50))
+    def neupositionieren(self):
+        self.rect.center = (random.randint(100, BILDSCHIRM_BREITE - 100), random.randint(50, BILDSCHIRM_HOEHE - 50))
 
 
-class Abladeplatz(pygame.sprite.Sprite):
+# Lager-Klasse
+class Lager(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = load_image('storage')
-        self.rect = self.image.get_rect(center=(screen_width - 150, screen_height // 2))
+        self.image = bild_laden('lager')
+        self.rect = self.image.get_rect(center=(BILDSCHIRM_BREITE - 150, BILDSCHIRM_HOEHE // 2))
         self.erz = 0
-        self.kapazität = 1000
+        self.kapazitaet = 1000
 
 
+# Tankstelle-Klasse
 class Tankstelle(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = load_image('fuel')
-        self.rect = self.image.get_rect(
-            center=(random.randint(50, screen_width - 50), random.randint(50, screen_height - 50)))
+        self.image = bild_laden('tankstelle')
+        self.rect = self.image.get_rect(center=(random.randint(50, BILDSCHIRM_BREITE - 50), random.randint(50, BILDSCHIRM_HOEHE - 50)))
 
 
+# Hauptfunktion
 def main():
-    global screen
-    running = True
-    paused = False
+    global BILDSCHIRM
+    laufend = True
+    pausiert = False
 
-    # Instanzen der Spielobjekte
+    # Spielobjekte erstellen
     lkw = LKW()
-    erzquelle = Erzquelle()
-    ablageplatz = Abladeplatz()
+    erz_quelle = Erzquelle()
+    lager = Lager()
     tankstelle = Tankstelle()
-    helipad = Helipad()
-    hubschrauber = Hubschrauber(lkw, helipad)
+    hubschrauberlandeplatz = Hubschrauberlandeplatz()
+    hubschrauber = Hubschrauber(lkw, hubschrauberlandeplatz)
 
     # Sprite-Gruppen
     alle_sprites = pygame.sprite.Group()
-    hubschrauber_group = pygame.sprite.Group()
-    alle_sprites.add(lkw, erzquelle, ablageplatz, tankstelle, helipad, hubschrauber)
-    hubschrauber_group.add(hubschrauber)
+    hubschrauber_gruppe = pygame.sprite.Group()
+    alle_sprites.add(lkw, erz_quelle, lager, tankstelle, hubschrauberlandeplatz, hubschrauber)
+    hubschrauber_gruppe.add(hubschrauber)
 
-    x_start = 10
-    y_start = 10
-    line_spacing = 25
+    while laufend:
+        tasten = pygame.key.get_pressed()
+        for ereignis in pygame.event.get():
+            if ereignis.type == pygame.QUIT:
+                laufend = False
+            if ereignis.type == pygame.KEYDOWN:
+                if ereignis.key == Tasten.PAUSE.value:
+                    pausiert = not pausiert
 
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+        if not pausiert:
+            lkw.update(tasten, erz_quelle, lager, tankstelle, hubschrauber_gruppe)
+            hubschrauber_gruppe.update()
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    paused = not paused
+            BILDSCHIRM.fill(WEISS)
+            alle_sprites.draw(BILDSCHIRM)
 
-        if not paused:
-            lkw.update(erzquelle, ablageplatz, tankstelle, hubschrauber_group)
-            hubschrauber_group.update()
-
-            screen.fill(WHITE)
-            alle_sprites.draw(screen)
-
-            infos = [
-                f'Sprit: {int(lkw.sprit)}',
+            info_liste = [
+                f'Sprit: {int(lkw.kraftstoff)}',
                 f'Erz im LKW: {lkw.erz}',
-                f'Erz gestohlen: {lkw.gestohlenes_erz}',
-                f'Erz am Abladeplatz: {ablageplatz.erz}/{ablageplatz.kapazität}'
+                f'Erz am Lager: {lager.erz}/{lager.kapazitaet}'
             ]
-
-            draw_infos(screen, font_small, infos, x_start, y_start, line_spacing)
+            zeige_infos(info_liste, 10, separate_info=f'Erz gestohlen: {lkw.gestohlenes_erz}')
 
         else:
             pause()
 
         pygame.display.flip()
-        clock.tick(FPS)
+        UHR.tick(FPS)
 
-        if lkw.sprit <= 0 or ablageplatz.erz >= ablageplatz.kapazität or lkw.gestohlenes_erz > 0.2 * (erzquelle.erz_menge + lkw.erz):
-            running = False
-            end_message = "Spiel vorbei! Neu starten? (J/N)"
-            text_surface = font_large.render(end_message, True, RED)
-            text_rect = text_surface.get_rect(center=(screen_width / 2, screen_height / 2))
-            screen.fill(WHITE)
-            screen.blit(text_surface, text_rect)
+        if lkw.kraftstoff <= 0 or lager.erz >= lager.kapazitaet or lkw.gestohlenes_erz > 200:
+            laufend = False
+            endnachricht = "Spiel vorbei! Neu starten? (J/N)"
+            text_surface = SCHRIFT_GROSS.render(endnachricht, True, ROT)
+            text_rect = text_surface.get_rect(center=(BILDSCHIRM_BREITE / 2, BILDSCHIRM_HOEHE / 2))
+            BILDSCHIRM.fill(WEISS)
+            BILDSCHIRM.blit(text_surface, text_rect)
             pygame.display.flip()
 
-            wait_for_input = True
-            while wait_for_input:
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_j:
+            auf_eingabe_warten = True
+            while auf_eingabe_warten:
+                for ereignis in pygame.event.get():
+                    if ereignis.type == pygame.KEYDOWN:
+                        if ereignis.key == pygame.K_j:
                             main()
-                            wait_for_input = False
-                        elif event.key == pygame.K_n:
+                            auf_eingabe_warten = False
+                        elif ereignis.key == pygame.K_n:
                             pygame.quit()
                             return
-                    elif event.type == pygame.QUIT:
+                    elif ereignis.type == pygame.QUIT:
                         pygame.quit()
                         return
 
@@ -307,5 +324,11 @@ def main():
 
 
 if __name__ == '__main__':
-    startbildschirm()
+    # Bildschirm einrichten
+    BILDSCHIRM = pygame.display.set_mode((BILDSCHIRM_BREITE, BILDSCHIRM_HOEHE))
+    pygame.display.set_caption("ErzCollector")
+    UHR = pygame.time.Clock()
+
+    # Spiel starten
+    start_bildschirm()
     main()
